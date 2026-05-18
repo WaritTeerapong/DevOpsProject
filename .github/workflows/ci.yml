@@ -7,24 +7,28 @@ on:
   pull_request:
     branches: [ main, master ]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Use Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: '18.x'
+        node-version: '24' # Using latest as per GitHub recommendation
         cache: 'npm'
-        cache-dependency-path: 'services/challenge-service/package-lock.json'
+        cache-dependency-path: './package-lock.json'
 
-    - name: Install dependencies (Challenge Service)
-      working-directory: services/challenge-service
+    - name: Install dependencies
       run: npm ci
 
     - name: Generate Prisma Client
-      working-directory: services/challenge-service
       run: npx prisma generate
+
+    - name: Build Application
+      run: npm run build
