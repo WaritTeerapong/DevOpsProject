@@ -1,16 +1,27 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { redis } from '@/lib/redis';
 import { hashFlag } from '@/lib/hash';
 import { verifyToken } from '@/lib/auth-utils';
 
+// In-memory Rate Limiting (Map)
+const rateLimitMap = new Map<string, { count: number, lastReset: number }>();
+
 async function rateLimit(userId: string) {
-  const key = `ratelimit:submission:${userId}`;
-  const current = await redis.incr(key);
-  if (current === 1) {
-    await redis.expire(key, 60);
+  const now = Date.now();
+  const windowMs = 60 * 1000; // 1 minute
+  const limit = 5;
+
+  const userLimit = rateLimitMap.get(userId) || { count: 0, lastReset: now };
+
+  if (now - userLimit.lastReset > windowMs) {
+    userLimit.count = 1;
+    userLimit.lastReset = now;
+  } else {
+    userLimit.count++;
   }
-  return current > 5;
+
+  rateLimitMap.set(userId, userLimit);
+  return userLimit.count > limit;
 }
 
 export async function POST(request: Request) {
@@ -27,7 +38,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'challengeId and flag are required' }, { status: 400 });
     }
 
-    // Rate Limiting
+    // Rate Limiting (In-memory)
     const isLimited = await rateLimit(userId);
     if (isLimited) {
       return NextResponse.json({ 
@@ -57,23 +68,13 @@ export async function POST(request: Request) {
 
     if (isCorrect) {
       // 3. Update Score
-      const updatedUser = await prisma.user.update({
+      await prisma.user.update({
         where: { id: userId },
         data: { totalScore: { increment: challenge.points } }
       });
 
-      // 4. Pub/Sub for real-time updates
-      const eventData = {
-        userId: updatedUser.id,
-        username: updatedUser.username,
-        challengeId: challenge.id,
-        challengeTitle: challenge.title,
-        points: challenge.points,
-        totalScore: updatedUser.totalScore,
-        solvedAt: new Date().toISOString()
-      };
-      
-      await redis.publish('ctf:solves', JSON.stringify(eventData));
+      // Note: Real-time update (io.emit) is currently disabled as it required Redis Pub/Sub 
+      // or direct access to the Socket.io instance.
 
       return NextResponse.json({ correct: true, points: challenge.points, message: 'Correct flag!' });
     }

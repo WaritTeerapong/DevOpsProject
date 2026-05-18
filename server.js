@@ -3,7 +3,6 @@ const express = require("express");
 const next = require("next");
 const http = require("http");
 const { Server } = require("socket.io");
-const Redis = require("ioredis");
 const passport = require("./passport-config");
 const authService = require("./auth-service");
 
@@ -12,7 +11,6 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 const port = process.env.PORT || 3000;
-const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 
 app.prepare().then(() => {
   const server = express();
@@ -31,39 +29,6 @@ app.prepare().then(() => {
     socket.on("disconnect", () => {
       console.log("Client disconnected from Monolith WS:", socket.id);
     });
-  });
-
-  // Redis Subscriber for Real-time updates
-  const redisSubscriber = new Redis(REDIS_URL, {
-    maxRetriesPerRequest: null,
-  });
-
-  redisSubscriber.on("error", (err) => {
-    if (err.name === 'MaxRetriesPerRequestError') {
-      console.error("Critical Redis Subscriber Error: MaxRetriesPerRequestError. Connection retries exhausted.");
-      console.error("Details:", err.message);
-    } else {
-      console.error("Redis Subscriber Error:", err);
-    }
-  });
-
-  redisSubscriber.subscribe("ctf:solves", (err, count) => {
-    if (err) {
-      console.error("Failed to subscribe to Redis channel:", err);
-    } else {
-      console.log(`Subscribed to ${count} Redis channel(s).`);
-    }
-  });
-
-  redisSubscriber.on("message", (channel, message) => {
-    if (channel === "ctf:solves") {
-      try {
-        const data = JSON.parse(message);
-        io.emit("new-solve", data);
-      } catch (error) {
-        console.error("Error parsing Redis message:", error);
-      }
-    }
   });
 
   // Middleware
