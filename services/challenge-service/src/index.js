@@ -2,10 +2,12 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const crypto = require('crypto');
+const Redis = require('ioredis');
 require('dotenv').config();
 
 const app = express();
 const prisma = new PrismaClient();
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
@@ -13,6 +15,18 @@ app.use(express.json());
 // Helper to hash flag
 const hashFlag = (flag) => {
   return crypto.createHash('sha256').update(flag).digest('hex');
+};
+
+// Rate Limiting Middleware/Logic for Submissions
+const checkRateLimit = async (userId) => {
+  const key = `ratelimit:submission:${userId}`;
+  const current = await redis.incr(key);
+  
+  if (current === 1) {
+    await redis.expire(key, 60); // Reset every minute
+  }
+  
+  return current <= 5;
 };
 
 // GET /challenges - List all challenges
@@ -57,14 +71,29 @@ app.post('/challenges/:id/submit', async (req, res) => {
   const { id } = req.params;
   const { userId, flag } = req.body;
 
+  if (!userId || !flag) {
+    return res.status(400).json({ error: 'userId and flag are required' });
+  }
+
   try {
+    // 1. Check Rate Limit
+    const isWithinLimit = await checkRateLimit(userId);
+    if (!isWithinLimit) {
+      return res.status(429).json({ 
+        error: 'Too many requests', 
+        message: 'You can only submit 5 times per minute. Please wait.' 
+      });
+    }
+
+    // 2. Validate Challenge
     const challenge = await prisma.challenge.findUnique({ where: { id } });
     if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
 
+    // 3. Hash and Check
     const submittedHash = hashFlag(flag);
     const isCorrect = submittedHash === challenge.flagHash;
 
-    // Record submission
+    // 4. Record submission
     await prisma.submission.create({
       data: {
         userId,
