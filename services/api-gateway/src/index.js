@@ -4,6 +4,7 @@ const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cors = require('cors');
 const morgan = require('morgan');
+const verifyToken = require('./middlewares/authMiddleware');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -32,22 +33,31 @@ app.use('/auth', createProxyMiddleware({
   changeOrigin: true,
 }));
 
-// 2. Challenge Service
+// 2. Challenge Service (Public)
 app.use('/challenges', createProxyMiddleware({
   target: SERVICES.challenge,
   changeOrigin: true,
 }));
 
-// 3. User Service (within Challenge Service for now)
+// 3. User Service (within Challenge Service for now - Public for test creation)
 app.use('/users', createProxyMiddleware({
   target: SERVICES.challenge,
   changeOrigin: true,
 }));
 
-// 4. Submission Service
-app.use('/submit', createProxyMiddleware({
+// 4. Submission Service (Protected)
+app.use('/submit', verifyToken, createProxyMiddleware({
   target: SERVICES.submission,
   changeOrigin: true,
+  onProxyReq: (proxyReq, req, res) => {
+    // Forward user info from token to the service
+    if (req.user) {
+      // For simplicity, we can pass it as a header or just assume the service trusts the gateway
+      // Most services expect the userId in the body. Since this is a proxy, 
+      // we might need to handle body parsing if we want to inject userId.
+      // But for now, we'll just protect the route.
+    }
+  }
 }));
 
 // Start Gateway
