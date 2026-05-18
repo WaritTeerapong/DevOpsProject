@@ -65,7 +65,7 @@ app.prepare().then(() => {
   );
 
   // Next.js Handler
-  server.all("/*", (req, res) => {
+  server.all("/(.*)", (req, res) => {
     return handle(req, res);
   });
 
