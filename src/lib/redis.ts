@@ -15,7 +15,12 @@ export const redis =
   });
 
 redis.on('error', (err) => {
-  console.error('Redis Client Error:', err);
+  if (err.name === 'MaxRetriesPerRequestError') {
+    console.error('Critical Redis Error: MaxRetriesPerRequestError. The client has exceeded the maximum number of retries.');
+    console.error('Details:', err.message);
+  } else {
+    console.error('Redis Client Error:', err);
+  }
 });
 
 if (process.env.NODE_ENV !== 'production') globalForRedis.redis = redis;

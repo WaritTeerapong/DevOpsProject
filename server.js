@@ -39,7 +39,12 @@ app.prepare().then(() => {
   });
 
   redisSubscriber.on("error", (err) => {
-    console.error("Redis Subscriber Error:", err);
+    if (err.name === 'MaxRetriesPerRequestError') {
+      console.error("Critical Redis Subscriber Error: MaxRetriesPerRequestError. Connection retries exhausted.");
+      console.error("Details:", err.message);
+    } else {
+      console.error("Redis Subscriber Error:", err);
+    }
   });
 
   redisSubscriber.subscribe("ctf:solves", (err, count) => {
