@@ -6,7 +6,7 @@ services:
     env: node
     rootDir: services/api-gateway
     buildCommand: npm install
-    startCommand: node src/index.js
+    startCommand: node index.js
     envVars:
       - key: PORT
         value: 10000
@@ -46,7 +46,7 @@ services:
     env: node
     rootDir: services/auth-service
     buildCommand: npm install && npx prisma generate
-    startCommand: node src/index.js
+    startCommand: node index.js
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -67,7 +67,7 @@ services:
     env: node
     rootDir: services/auth-service
     buildCommand: npm install && npx prisma generate
-    startCommand: node src/index.js
+    startCommand: node index.js
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -88,7 +88,7 @@ services:
     env: node
     rootDir: services/challenge-service
     buildCommand: npm install && npx prisma generate
-    startCommand: node src/index.js
+    startCommand: node index.js
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -101,7 +101,7 @@ services:
     env: node
     rootDir: services/submission-service
     buildCommand: npm install && npx prisma generate
-    startCommand: node src/index.js
+    startCommand: node index.js
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -119,7 +119,7 @@ services:
     env: node
     rootDir: services/scoreboard-service
     buildCommand: npm install
-    startCommand: node src/index.js
+    startCommand: node index.js
     envVars:
       - key: REDIS_URL
         fromService:
@@ -133,7 +133,7 @@ services:
     env: node
     rootDir: services/frontend
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node index.js
     envVars:
       - key: NEXT_PUBLIC_API_GATEWAY_URL
         value: https://ctf-api-gateway.onrender.com
