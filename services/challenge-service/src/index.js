@@ -105,10 +105,24 @@ app.post('/challenges/:id/submit', async (req, res) => {
 
     if (isCorrect) {
       // Update user score
-      await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: { totalScore: { increment: challenge.points } }
       });
+
+      // Publish event to Redis Pub/Sub for real-time scoreboard
+      const eventData = {
+        userId: updatedUser.id,
+        username: updatedUser.username,
+        challengeId: challenge.id,
+        challengeTitle: challenge.title,
+        points: challenge.points,
+        totalScore: updatedUser.totalScore,
+        solvedAt: new Date().toISOString()
+      };
+      
+      await redis.publish('ctf:solves', JSON.stringify(eventData));
+
       return res.json({ correct: true, points: challenge.points, message: 'Correct flag!' });
     }
 
