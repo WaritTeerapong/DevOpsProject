@@ -27,88 +27,21 @@ services:
     volumes:
       - redis_data:/data
 
-  auth-service:
-    build: ./services/auth-service
-    container_name: auth-service
-    ports:
-      - "3004:3004"
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/ctf_db?schema=public
-      JWT_SECRET: ${JWT_SECRET:-supersecret}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      CALLBACK_URL: http://localhost:8000/auth/google/callback
-    depends_on:
-      - db
-    networks:
-      - ctf-network
-
-  challenge-service:
-    build: ./services/challenge-service
-    container_name: challenge-service
-    ports:
-      - "3001:3001"
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/ctf_db?schema=public
-    depends_on:
-      - db
-    networks:
-      - ctf-network
-
-  submission-service:
-    build: ./services/submission-service
-    container_name: submission-service
-    ports:
-      - "3002:3002"
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/ctf_db?schema=public
-      REDIS_URL: redis://redis:6379
-    depends_on:
-      - db
-      - redis
-    networks:
-      - ctf-network
-
-  scoreboard-service:
-    build: ./services/scoreboard-service
-    container_name: scoreboard-service
-    ports:
-      - "3003:3003"
-    environment:
-      REDIS_URL: redis://redis:6379
-    depends_on:
-      - redis
-    networks:
-      - ctf-network
-
-  api-gateway:
-    build: ./services/api-gateway
-    container_name: api-gateway
-    ports:
-      - "8000:8000"
-    environment:
-      AUTH_SERVICE_URL: http://auth-service:3004
-      CHALLENGE_SERVICE_URL: http://challenge-service:3001
-      SUBMISSION_SERVICE_URL: http://submission-service:3002
-      SCOREBOARD_SERVICE_URL: http://scoreboard-service:3003
-    depends_on:
-      - auth-service
-      - challenge-service
-      - submission-service
-      - scoreboard-service
-    networks:
-      - ctf-network
-
-  frontend:
+  monolith:
     build: ./services/frontend
-    container_name: frontend
+    container_name: ctf-monolith
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_GATEWAY_URL: http://localhost:8000
-      NEXT_PUBLIC_SCOREBOARD_WS_URL: http://localhost:3003
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/ctf_db?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-supersecret}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      CALLBACK_URL: http://localhost:3000/auth/google/callback
     depends_on:
-      - api-gateway
+      - db
+      - redis
     networks:
       - ctf-network
 

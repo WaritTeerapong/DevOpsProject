@@ -11,9 +11,12 @@ export default function Navbar() {
         <div className="space-x-6 flex items-center">
           <Link href="/challenges" className="hover:text-blue-400 transition-colors">Challenges</Link>
           <Link href="/scoreboard" className="hover:text-blue-400 transition-colors">Scoreboard</Link>
-          <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md font-semibold transition-all">
-            Login
-          </button>
+          <a 
+            href="/auth/google" 
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md font-semibold transition-all"
+          >
+            Login with Google
+          </a>
         </div>
       </div>
     </nav>
