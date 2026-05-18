@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import SubmitFlagForm from '@/components/SubmitFlagForm';
 
+export const dynamic = 'force-dynamic';
+
 // This is a Server Component by default in Next.js App Router
 export default async function ChallengesPage() {
   const challenges = await prisma.challenge.findMany({
