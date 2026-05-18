@@ -4,9 +4,9 @@ services:
   - type: web
     name: ctf-monolith
     env: node
-    rootDir: services/frontend
+    # Note: Adding prisma generate to ensure the client is available for the build
     buildCommand: npm install && npx prisma generate && npm run build
-    startCommand: node server.js
+    startCommand: npm start
     envVars:
       - key: PORT
         value: 10000
