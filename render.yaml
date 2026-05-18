@@ -1,0 +1,124 @@
+# render.yaml
+services:
+  # 1. API Gateway
+  - type: web
+    name: ctf-api-gateway
+    env: node
+    rootDir: services/api-gateway
+    buildCommand: npm install
+    startCommand: node src/index.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: AUTH_SERVICE_URL
+        fromService:
+          type: web
+          name: ctf-auth-service
+          property: host
+      - key: CHALLENGE_SERVICE_URL
+        fromService:
+          type: web
+          name: ctf-challenge-service
+          property: host
+      - key: SUBMISSION_SERVICE_URL
+        fromService:
+          type: web
+          name: ctf-submission-service
+          property: host
+      - key: SCOREBOARD_SERVICE_URL
+        fromService:
+          type: web
+          name: ctf-scoreboard-service
+          property: host
+      - key: JWT_SECRET
+        sync: false # Set manually in Render Dashboard
+
+  # 2. Auth Service
+  - type: web
+    name: ctf-auth-service
+    env: node
+    rootDir: services/auth-service
+    buildCommand: npm install && npx prisma generate
+    startCommand: node src/index.js
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ctf-db
+          property: connectionString
+      - key: JWT_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: CALLBACK_URL
+        value: https://ctf-api-gateway.onrender.com/auth/google/callback
+
+  # 3. Challenge Service
+  - type: web
+    name: ctf-challenge-service
+    env: node
+    rootDir: services/challenge-service
+    buildCommand: npm install && npx prisma generate
+    startCommand: node src/index.js
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ctf-db
+          property: connectionString
+
+  # 4. Submission Service
+  - type: web
+    name: ctf-submission-service
+    env: node
+    rootDir: services/submission-service
+    buildCommand: npm install && npx prisma generate
+    startCommand: node src/index.js
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ctf-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: ctf-redis
+          property: connectionString
+
+  # 5. Scoreboard Service
+  - type: web
+    name: ctf-scoreboard-service
+    env: node
+    rootDir: services/scoreboard-service
+    buildCommand: npm install
+    startCommand: node src/index.js
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: ctf-redis
+          property: connectionString
+
+  # 6. Frontend (Next.js)
+  - type: web
+    name: ctf-frontend
+    env: node
+    rootDir: services/frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_GATEWAY_URL
+        value: https://ctf-api-gateway.onrender.com
+      - key: NEXT_PUBLIC_SCOREBOARD_WS_URL
+        value: https://ctf-scoreboard-service.onrender.com
+
+# Databases
+databases:
+  - name: ctf-db
+    plan: free # Change to starter for production
+
+# Redis
+redis:
+  - name: ctf-redis
+    plan: free
+    ipAllowList: [] # Allow internal access only
