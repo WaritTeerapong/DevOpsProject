@@ -30,11 +30,14 @@ export default function Dashboard() {
   if (!session) return <div className="container">Please login to view your characters.</div>;
 
   return (
-    <div className="container">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-        <h1>My Characters</h1>
-        <button className="button">Create New</button>
-      </div>
+    import Link from "next/link";
+
+    // ... inside the component
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+            <h1>My Characters</h1>
+            <Link href="/characters/new" className="button" style={{ textDecoration: "none" }}>Create New</Link>
+          </div>
+
 
       {loading ? <p>Loading...</p> : (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
