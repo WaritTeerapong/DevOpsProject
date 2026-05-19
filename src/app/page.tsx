@@ -1,76 +1,22 @@
-"use client";
+import Link from "next/link";
 
-import { useEffect, useState } from "react";
-import "./globals.css";
-
-interface Standing {
-  rank: number;
-  name: string;
-  played: number;
-  won: number;
-  drawn: number;
-  lost: number;
-  gf: number;
-  ga: number;
-  gd: number;
-  points: number;
-}
-
-export default function StandingsPage() {
-  const [standings, setStandings] = useState<Standing[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/standings")
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setStandings(data);
-        setLoading(false);
-      });
-  }, []);
-
+export default function HomePage() {
   return (
-    <div className="container">
-      <header className="header">
-        <h1>Premier League Standings</h1>
-      </header>
-      
-      {loading ? (
-        <p>Loading table...</p>
-      ) : (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Pos</th>
-              <th>Club</th>
-              <th>Pl</th>
-              <th>W</th>
-              <th>D</th>
-              <th>L</th>
-              <th>GF</th>
-              <th>GA</th>
-              <th>GD</th>
-              <th>Pts</th>
-            </tr>
-          </thead>
-          <tbody>
-            {standings.map((s) => (
-              <tr key={s.name}>
-                <td>{s.rank}</td>
-                <td><strong>{s.name}</strong></td>
-                <td>{s.played}</td>
-                <td>{s.won}</td>
-                <td>{s.drawn}</td>
-                <td>{s.lost}</td>
-                <td>{s.gf}</td>
-                <td>{s.ga}</td>
-                <td>{s.gd > 0 ? `+${s.gd}` : s.gd}</td>
-                <td><strong>{s.points}</strong></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+    <div className="container" style={{ textAlign: "center", padding: "6rem 0" }}>
+      <h1 style={{ fontSize: "4rem", color: "var(--secondary)", marginBottom: "1rem" }}>
+        Forge Your Legend
+      </h1>
+      <p style={{ fontSize: "1.5rem", color: "#aaa", marginBottom: "3rem" }}>
+        The ultimate Dungeons & Dragons character creation and management platform.
+      </p>
+      <div style={{ display: "flex", gap: "2rem", justifyContent: "center" }}>
+        <Link href="/dashboard" className="button" style={{ textDecoration: "none" }}>
+          Explore Dashboard
+        </Link>
+        <button className="button" style={{ background: "transparent", border: "1px solid var(--secondary)", color: "var(--secondary)" }}>
+          How it Works
+        </button>
+      </div>
     </div>
   );
 }

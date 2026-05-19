@@ -1,10 +1,10 @@
-import { StandingsListener } from "../infrastructure/listeners/StandingsListener";
-import { PrismaTeamRepository } from "../infrastructure/repositories/PrismaTeamRepository";
+import { DashboardListener } from "../infrastructure/listeners/DashboardListener";
+import { PrismaUserRepository } from "../infrastructure/repositories/PrismaUserRepository";
 
 export function initListeners() {
-  const teamRepository = new PrismaTeamRepository();
-  const standingsListener = new StandingsListener(teamRepository);
+  const userRepository = new PrismaUserRepository();
+  const dashboardListener = new DashboardListener(userRepository);
   
-  standingsListener.initialize();
-  console.log("[Listeners] All listeners initialized.");
+  dashboardListener.initialize();
+  console.log("[Listeners] D&D Character Platform listeners initialized.");
 }

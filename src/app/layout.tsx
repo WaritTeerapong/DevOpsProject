@@ -1,8 +1,10 @@
 import "./globals.css";
+import Navbar from "@/components/Navbar";
+import { Providers } from "@/components/Providers";
 
 export const metadata = {
-  title: "Premier League Stats",
-  description: "Live results and league table",
+  title: "D&D Character Creator",
+  description: "Create and manage your D&D characters",
 };
 
 export default function RootLayout({
@@ -13,7 +15,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <main>{children}</main>
+        <Providers>
+          <Navbar />
+          <main>{children}</main>
+        </Providers>
       </body>
     </html>
   );

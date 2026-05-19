@@ -4,26 +4,27 @@
 
 # Project Context & Requirements
 
-คุณกำลังให้คำปรึกษาและเขียนโค้ดสำหรับ "ระบบดูผลและสถิติการแข่งขันฟุตบอลพรีเมียร์ลีก (Premier League Match Results & Stats)" โดยมี Requirement และ Business Logic หลักดังนี้:
+คุณกำลังให้คำปรึกษาและเขียนโค้ดสำหรับ "ระบบสร้างและจัดการตัวละคร D&D (D&D Character Creator Platform)" โดยมี Requirement และ Business Logic หลักดังนี้:
 
-1. **Public Access:** ระบบนี้เป็นแพลตฟอร์มสาธารณะสำหรับแฟนบอล ผู้ใช้สามารถเข้าใช้งานได้ทันทีโดย **ไม่ต้องมีระบบ Register/Login**
-2. **Match Fixtures & Results:** มีระบบแสดงโปรแกรมการแข่งขันและผลสกอร์ของแต่ละคู่ที่ถูกจัดเก็บไว้ในฐานข้อมูล
-3. **Match Statistics:** ผู้ใช้สามารถกดเข้าไปดูรายละเอียดสถิติเชิงลึกในแต่ละแมตช์ได้ (เช่น เปอร์เซ็นต์การครองบอล, โอกาสยิง, จำนวนใบเหลือง/แดง, รายชื่อคนทำประตู)
-4. **League Table (Event-driven):** มีหน้าแสดงตารางคะแนนรวม (Standings) โดยใช้รูปแบบ Event-Driven (เช่น เมื่อระบบหลังบ้านมีการอัปเดตผลสกอร์การแข่งขัน Use Case จะยิง Event ออกไป เพื่อคำนวณแต้ม/ลูกได้เสียของตารางคะแนนใหม่ และอัปเดตข้อมูลให้ Frontend ทราบ)
+1. **Authentication:** ระบบ Register และ Login ทำผ่าน Google OAuth เท่านั้น
+2. **Character Management:** แต่ละ Account (User) สามารถสร้าง ดู แก้ไข และลบ (CRUD) โปรไฟล์ตัวละคร D&D ของตัวเองได้
+3. **Character Customization:** ผู้ใช้สามารถเลือก เผ่า (Race), คลาส (Class), กำหนดค่าสเตตัสต่างๆ (Stats เช่น STR, DEX, CON, INT, WIS, CHA) และเลือกทักษะ (Skills) ให้กับตัวละครได้
+4. **Dashboard & Tracking (Event-driven):** มีหน้า Dashboard สรุปข้อมูลของผู้ใช้ โดยใช้รูปแบบ Event-Driven (เช่น เมื่อผู้ใช้สร้างตัวละครใหม่สำเร็จ `CreateCharacterUseCase` จะยิง Event ออกไป เพื่ออัปเดตจำนวนตัวละครที่ผู้ใช้มี หรือปลดล็อก Achievement/Badge และแจ้งให้ Frontend รีเฟรชข้อมูล)
 
 # Technology Stack (เครื่องมือที่บังคับใช้)
 
 - **Web Framework:** Next.js (ใช้เป็น Monolith ครอบคลุมทั้ง Frontend UI และ Backend API)
+- **Auth:** OAuth (ใช้ NextAuth.js / Auth.js)
 - **Database & ORM:** PostgreSQL + Prisma
 - **Infrastructure:** Docker Compose (สำหรับการจำลอง DB/Services ใน Local)
 - **CI/CD:** GitHub Actions
 
 # Architecture Rules & Constraints
 
-1. **The Dependency Rule:** ชั้น Business Logic (Domain และ Use Cases) **ห้าม** import เครื่องมืออย่าง `next` หรือ `@prisma/client` โดยตรง ต้องเชื่อมต่อผ่าน Interface (Ports) เท่านั้น
-2. **Repository Pattern:** กฎเกณฑ์การดึงข้อมูลจาก PostgreSQL ต้องถูกซ่อนไว้ในชั้น Infrastructure (เช่น `PrismaMatchRepository` หรือ `PrismaTeamRepository`)
+1. **The Dependency Rule:** ชั้น Business Logic (Domain และ Use Cases) **ห้าม** import เครื่องมืออย่าง `next`, `next-auth` หรือ `@prisma/client` โดยตรง ต้องเชื่อมต่อผ่าน Interface (Ports) เท่านั้น
+2. **Repository Pattern:** กฎเกณฑ์การดึงข้อมูลจาก PostgreSQL ต้องถูกซ่อนไว้ในชั้น Infrastructure (เช่น `PrismaCharacterRepository` หรือ `PrismaUserRepository`)
 3. **Controller Pattern:** ให้มอง Next.js API Routes (Route Handlers) หรือ Server Actions เป็นเพียงแค่ `Interface Adapters` (Controllers) ที่ทำหน้าที่รับ HTTP Request, โยนต่อให้ Use Case และส่ง HTTP Response กลับไป
-4. **Event-Driven Flow:** การอัปเดตตารางคะแนนต้องทำแบบ Decouple ตัวอย่างเช่น `UpdateMatchResultUseCase` เมื่อทำงานและบันทึกสกอร์สำเร็จ จะยิง Domain Event ออกมา (เช่น `MatchResultUpdated`) เพื่อให้ Listener นำข้อมูลไปคำนวณตารางคะแนนใหม่
+4. **Event-Driven Flow:** การอัปเดตข้อมูลที่เกี่ยวข้องกันต้องทำแบบ Decouple ตัวอย่างเช่น `CreateCharacterUseCase` เมื่อทำงานและบันทึกตัวละครลงฐานข้อมูลสำเร็จ จะยิง Domain Event ออกมา (เช่น `CharacterCreated`) เพื่อให้ Listener นำข้อมูลไปอัปเดตสถิติรวมของ User
 
 # Output Format
 

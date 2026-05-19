@@ -7,55 +7,74 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Team {
+// --- NextAuth.js Required Models ---
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  characterCount Int      @default(0)
+  
+  accounts      Account[]
+  sessions      Session[]
+  characters    Character[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// --- D&D Domain Models ---
+model Character {
   id        String   @id @default(cuid())
-  name      String   @unique
-  logoUrl   String?
+  userId    String
+  name      String
+  race      String
+  class     String
   
-  // Standings data
-  played    Int      @default(0)
-  won       Int      @default(0)
-  drawn     Int      @default(0)
-  lost      Int      @default(0)
-  gf        Int      @default(0) // Goals For
-  ga        Int      @default(0) // Goals Against
-  points    Int      @default(0)
-
-  homeMatches Match[] @relation("HomeTeam")
-  awayMatches Match[] @relation("AwayTeam")
-}
-
-model Match {
-  id            String   @id @default(cuid())
-  homeTeamId    String
-  awayTeamId    String
-  homeScore     Int?
-  awayScore     Int?
-  matchDate     DateTime
-  status        String   @default("SCHEDULED") // SCHEDULED, FINISHED
-
-  // Statistics
-  possessionHome Int?
-  possessionAway Int?
-  shotsHome      Int?
-  shotsAway      Int?
-  yellowCardsHome Int?
-  yellowCardsAway Int?
-  redCardsHome    Int?
-  redCardsAway    Int?
-
-  homeTeam Team @relation("HomeTeam", fields: [homeTeamId], references: [id])
-  awayTeam Team @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  // Stats
+  strength  Int      @default(10)
+  dexterity Int      @default(10)
+  constitution Int   @default(10)
+  intelligence Int   @default(10)
+  wisdom       Int   @default(10)
+  charisma     Int   @default(10)
   
-  scorers Scorer[]
-}
+  skills    String[] // List of selected skills
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-model Scorer {
-  id        String @id @default(cuid())
-  matchId   String
-  playerName String
-  minute     Int
-  teamId     String // To identify which team scored
-
-  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
