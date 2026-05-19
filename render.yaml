@@ -14,14 +14,14 @@ services:
         fromDatabase:
           name: ctf-db
           property: connectionString
-      - key: JWT_SECRET
+      - key: NEXTAUTH_SECRET
         sync: false
+      - key: NEXTAUTH_URL
+        value: https://ctf-monolith.onrender.com
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
-      - key: CALLBACK_URL
-        value: https://ctf-monolith.onrender.com/auth/google/callback
 
 # Databases
 databases:
