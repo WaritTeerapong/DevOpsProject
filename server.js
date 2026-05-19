@@ -33,7 +33,7 @@ app.prepare().then(() => {
   server.use(express.json());
 
   // Next.js Catch-all Handler (Must be last)
-  server.all("/*splat", (req, res) => {
+  server.all("*", (req, res) => {
     return handle(req, res);
   });
 
