@@ -42,19 +42,21 @@ export default function Dashboard() {
       {loading ? <p>Loading...</p> : (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
           {characters.map(c => (
-            <div key={c.id} className="card">
-              <h2 style={{ color: "var(--secondary)", margin: 0 }}>{c.name}</h2>
-              <p style={{ margin: "0.5rem 0" }}>{c.race} {c.class}</p>
-              
-              <div className="stats-grid">
-                {Object.entries(c.stats).map(([stat, val]: any) => (
-                  <div key={stat} className="stat-box">
-                    <div style={{ fontSize: "0.7rem", textTransform: "uppercase" }}>{stat.slice(0,3)}</div>
-                    <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>{val}</div>
-                  </div>
-                ))}
+            <Link href={`/characters/${c.id}`} key={c.id} style={{ textDecoration: "none", color: "inherit" }}>
+              <div className="card" style={{ cursor: "pointer", transition: "transform 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"} onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}>
+                <h2 style={{ color: "var(--secondary)", margin: 0 }}>{c.name}</h2>
+                <p style={{ margin: "0.5rem 0" }}>{c.race} {c.class}</p>
+                
+                <div className="stats-grid">
+                  {Object.entries(c.stats).map(([stat, val]: any) => (
+                    <div key={stat} className="stat-box">
+                      <div style={{ fontSize: "0.7rem", textTransform: "uppercase" }}>{stat.slice(0,3)}</div>
+                      <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>{val}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
           {characters.length === 0 && <p>No characters found. Embark on a journey and create one!</p>}
         </div>
