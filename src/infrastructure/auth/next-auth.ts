@@ -1,30 +1,76 @@
-import NextAuth, { NextAuthOptions, DefaultSession } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import NextAuth, { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../database/prisma";
+import bcrypt from "bcrypt";
 import { initListeners } from "@/shared/init-listeners";
 
-// Ensure listeners are registered
 initListeners();
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Missing credentials");
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email }
+        }) as any;
+
+        if (!user || !user.password) {
+          throw new Error("Invalid credentials");
+        }
+
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
+
+        if (!isPasswordValid) {
+          throw new Error("Invalid credentials");
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          characterCount: user.characterCount,
+        };
+      }
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        // @ts-ignore
+        token.characterCount = user.characterCount;
+      }
+      return token;
+    },
+    async session({ session, token }) {
       if (session.user) {
         // @ts-ignore
-        session.user.id = user.id;
+        session.user.id = token.id;
         // @ts-ignore
-        session.user.characterCount = user.characterCount;
+        session.user.characterCount = token.characterCount;
       }
       return session;
     },
+  },
+  session: {
+    strategy: "jwt",
+  },
+  pages: {
+    signIn: "/auth/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
