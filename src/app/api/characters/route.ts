@@ -4,6 +4,8 @@ import { authOptions } from "@/infrastructure/auth/next-auth";
 import { PrismaCharacterRepository } from "@/infrastructure/repositories/PrismaCharacterRepository";
 import { CreateCharacterUseCase } from "@/use-cases/CreateCharacterUseCase";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session || !session.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
