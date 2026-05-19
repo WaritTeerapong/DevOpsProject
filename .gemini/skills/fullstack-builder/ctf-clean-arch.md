@@ -4,27 +4,26 @@
 
 # Project Context & Requirements
 
-คุณกำลังให้คำปรึกษาและเขียนโค้ดสำหรับ "ระบบแพลตฟอร์ม CTF (Capture The Flag)" โดยมี Requirement และ Business Logic หลักดังนี้:
+คุณกำลังให้คำปรึกษาและเขียนโค้ดสำหรับ "ระบบดูผลและสถิติการแข่งขันฟุตบอลพรีเมียร์ลีก (Premier League Match Results & Stats)" โดยมี Requirement และ Business Logic หลักดังนี้:
 
-1. **Authentication:** ระบบ Register และ Login ทำผ่าน Google OAuth เท่านั้น
-2. **Challenges:** มีระบบโจทย์ (Preset Challenges) ที่ถูกเตรียมข้อมูลเอาไว้ล่วงหน้าในฐานข้อมูล
-3. **Submission:** ผู้ใช้สามารถกรอกส่งคำตอบ (Flag) ในแต่ละโจทย์ได้ ระบบจะต้องตรวจคำตอบและบันทึกผล
-4. **Scoreboard (Event-driven):** มีกระดานแสดงคะแนนรวม โดยใช้รูปแบบ Event-Driven (เช่น เมื่อมีผู้ใช้ Submit คำตอบถูก Use Case จะยิง Event ออกไป เพื่ออัปเดตคะแนนและแจ้งให้ Scoreboard ฝั่ง Frontend รีเฟรชข้อมูล)
+1. **Public Access:** ระบบนี้เป็นแพลตฟอร์มสาธารณะสำหรับแฟนบอล ผู้ใช้สามารถเข้าใช้งานได้ทันทีโดย **ไม่ต้องมีระบบ Register/Login**
+2. **Match Fixtures & Results:** มีระบบแสดงโปรแกรมการแข่งขันและผลสกอร์ของแต่ละคู่ที่ถูกจัดเก็บไว้ในฐานข้อมูล
+3. **Match Statistics:** ผู้ใช้สามารถกดเข้าไปดูรายละเอียดสถิติเชิงลึกในแต่ละแมตช์ได้ (เช่น เปอร์เซ็นต์การครองบอล, โอกาสยิง, จำนวนใบเหลือง/แดง, รายชื่อคนทำประตู)
+4. **League Table (Event-driven):** มีหน้าแสดงตารางคะแนนรวม (Standings) โดยใช้รูปแบบ Event-Driven (เช่น เมื่อระบบหลังบ้านมีการอัปเดตผลสกอร์การแข่งขัน Use Case จะยิง Event ออกไป เพื่อคำนวณแต้ม/ลูกได้เสียของตารางคะแนนใหม่ และอัปเดตข้อมูลให้ Frontend ทราบ)
 
 # Technology Stack (เครื่องมือที่บังคับใช้)
 
-- **Web Framework:** Next.js (ใช้เป็น Monolith ครอบคลุมทั้ง Frontend และ Backend API)
-- **Auth:** OAuth (เช่น NextAuth.js / Auth.js)
+- **Web Framework:** Next.js (ใช้เป็น Monolith ครอบคลุมทั้ง Frontend UI และ Backend API)
 - **Database & ORM:** PostgreSQL + Prisma
 - **Infrastructure:** Docker Compose (สำหรับการจำลอง DB/Services ใน Local)
 - **CI/CD:** GitHub Actions
 
 # Architecture Rules & Constraints
 
-1. **The Dependency Rule:** ชั้น Business Logic (Domain และ Use Cases) **ห้าม** import เครื่องมืออย่าง `next`, `next-auth` หรือ `@prisma/client` โดยตรง ต้องเชื่อมต่อผ่าน Interface (Ports) เท่านั้น
-2. **Repository Pattern:** กฎเกณฑ์การดึงข้อมูลจาก PostgreSQL ต้องถูกซ่อนไว้ในชั้น Infrastructure (เช่น `PrismaChallengeRepository` หรือ `PrismaUserRepository`)
+1. **The Dependency Rule:** ชั้น Business Logic (Domain และ Use Cases) **ห้าม** import เครื่องมืออย่าง `next` หรือ `@prisma/client` โดยตรง ต้องเชื่อมต่อผ่าน Interface (Ports) เท่านั้น
+2. **Repository Pattern:** กฎเกณฑ์การดึงข้อมูลจาก PostgreSQL ต้องถูกซ่อนไว้ในชั้น Infrastructure (เช่น `PrismaMatchRepository` หรือ `PrismaTeamRepository`)
 3. **Controller Pattern:** ให้มอง Next.js API Routes (Route Handlers) หรือ Server Actions เป็นเพียงแค่ `Interface Adapters` (Controllers) ที่ทำหน้าที่รับ HTTP Request, โยนต่อให้ Use Case และส่ง HTTP Response กลับไป
-4. **Event-Driven Flow:** การอัปเดตคะแนนต้องทำแบบ Decouple ตัวอย่างเช่น `SubmitFlagUseCase` เมื่อทำงานสำเร็จ จะยิง Domain Event ออกมา เพื่อให้ Listener นำข้อมูลไปอัปเดต Scoreboard หรือ Push ขึ้น UI
+4. **Event-Driven Flow:** การอัปเดตตารางคะแนนต้องทำแบบ Decouple ตัวอย่างเช่น `UpdateMatchResultUseCase` เมื่อทำงานและบันทึกสกอร์สำเร็จ จะยิง Domain Event ออกมา (เช่น `MatchResultUpdated`) เพื่อให้ Listener นำข้อมูลไปคำนวณตารางคะแนนใหม่
 
 # Output Format
 

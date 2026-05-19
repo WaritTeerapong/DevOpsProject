@@ -1,10 +1,8 @@
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import { Providers } from "@/components/Providers";
 
 export const metadata = {
-  title: "CTF Platform",
-  description: "A clean architecture CTF platform",
+  title: "Premier League Stats",
+  description: "Live results and league table",
 };
 
 export default function RootLayout({
@@ -15,10 +13,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>
-          <Navbar />
-          <main className="container">{children}</main>
-        </Providers>
+        <main>{children}</main>
       </body>
     </html>
   );

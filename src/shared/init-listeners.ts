@@ -1,7 +1,10 @@
-import { ScoreboardListener } from "../infrastructure/listeners/ScoreboardListener";
+import { StandingsListener } from "../infrastructure/listeners/StandingsListener";
+import { PrismaTeamRepository } from "../infrastructure/repositories/PrismaTeamRepository";
 
-// Initialize all domain event listeners
 export function initListeners() {
-  ScoreboardListener.initialize();
-  console.log("Listeners initialized");
+  const teamRepository = new PrismaTeamRepository();
+  const standingsListener = new StandingsListener(teamRepository);
+  
+  standingsListener.initialize();
+  console.log("[Listeners] All listeners initialized.");
 }
