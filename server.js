@@ -1,10 +1,10 @@
-require("dotenv").config();
-const express = require("express");
-const next = require("next");
-const http = require("http");
-const { Server } = require("socket.io");
-const passport = require("./passport-config");
-const authService = require("./auth-service");
+import "dotenv/config";
+import express from "express";
+import next from "next";
+import http from "http";
+import { Server } from "socket.io";
+import passport from "./passport-config";
+import authService from "./auth-service";
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -64,8 +64,8 @@ app.prepare().then(() => {
     },
   );
 
-  // Next.js Handler
-  server.all("/{*splat}", (req, res) => {
+  // Next.js Catch-all Handler (Must be last)
+  server.all("*", (req, res) => {
     return handle(req, res);
   });
 
