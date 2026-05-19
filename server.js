@@ -3,8 +3,6 @@ import express from "express";
 import next from "next";
 import http from "http";
 import { Server } from "socket.io";
-import passport from "./passport-config";
-import authService from "./auth-service";
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -33,36 +31,6 @@ app.prepare().then(() => {
 
   // Middleware
   server.use(express.json());
-  server.use(passport.initialize());
-
-  // Auth Routes
-  server.get(
-    "/auth/google",
-    passport.authenticate("google", { scope: ["profile", "email"] }),
-  );
-
-  server.get(
-    "/auth/google/callback",
-    passport.authenticate("google", {
-      session: false,
-      failureRedirect: "/login",
-    }),
-    (req, res) => {
-      const token = authService.generateToken(req.user);
-      // In a monolith, we can redirect to a frontend route with the token
-      // or return JSON if the frontend expects it.
-      // The original auth-service returned JSON.
-      res.json({
-        message: "Authentication successful",
-        token: token,
-        user: {
-          id: req.user.id,
-          username: req.user.username,
-          email: req.user.email,
-        },
-      });
-    },
-  );
 
   // Next.js Catch-all Handler (Must be last)
   server.all("*", (req, res) => {

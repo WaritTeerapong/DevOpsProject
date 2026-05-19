@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashFlag } from '@/lib/hash';
-import { verifyToken } from '@/lib/auth-utils';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 // In-memory Rate Limiting (Map)
 const rateLimitMap = new Map<string, { count: number, lastReset: number }>();
@@ -26,13 +27,13 @@ async function rateLimit(userId: string) {
 
 export async function POST(request: Request) {
   try {
-    const decoded = verifyToken(request);
-    if (!decoded) {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { challengeId, flag } = await request.json();
-    const userId = decoded.userId;
+    const userId = session.user.id;
 
     if (!challengeId || !flag) {
       return NextResponse.json({ error: 'challengeId and flag are required' }, { status: 400 });

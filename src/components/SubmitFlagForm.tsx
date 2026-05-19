@@ -20,13 +20,8 @@ export default function SubmitFlagForm({ challengeId }: SubmitFormProps) {
     setMessage('');
 
     try {
-      // Note: In a real app, the token would be handled by the auth provider/interceptor
-      // Here we assume it's in localStorage if the user is logged in
-      const token = localStorage.getItem('token');
-      
       const response = await axios.post('/api/submit', 
-        { challengeId, flag },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { challengeId, flag }
       );
 
       if (response.data.correct) {
