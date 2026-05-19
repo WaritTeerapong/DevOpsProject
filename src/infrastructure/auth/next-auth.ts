@@ -18,9 +18,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, user }) {
       if (session.user) {
-        // @ts-ignore - Adding custom property 'id' to session user
         session.user.id = user.id;
-        // @ts-ignore
         session.user.score = user.score;
       }
       return session;
