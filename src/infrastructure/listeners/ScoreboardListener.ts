@@ -1,6 +1,6 @@
-import { prisma } from "../infrastructure/database/prisma";
-import { domainEventsBus } from "../shared/DomainEventsBus";
-import { FlagSubmittedCorrectly } from "../domain/events/FlagSubmittedCorrectly";
+import { prisma } from "../database/prisma";
+import { domainEventsBus } from "../../shared/DomainEventsBus";
+import { FlagSubmittedCorrectly } from "../../domain/events/FlagSubmittedCorrectly";
 
 export class ScoreboardListener {
   public static initialize() {
