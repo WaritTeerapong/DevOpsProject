@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { DiceRoller } from "@/shared/DiceRoller";
 
 const RACES = ["Human", "Elf", "Dwarf", "Halfling", "Dragonborn", "Tiefling"];
 const CLASSES = ["Fighter", "Wizard", "Rogue", "Cleric", "Paladin", "Bard", "Ranger"];
@@ -31,6 +32,11 @@ export default function CreateCharacterPage() {
       ...formData,
       stats: { ...formData.stats, [stat]: Math.max(1, Math.min(30, value)) },
     });
+  };
+
+  const handleRollStats = () => {
+    const rolledStats = DiceRoller.rollAllStats();
+    setFormData({ ...formData, stats: rolledStats });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -102,7 +108,18 @@ export default function CreateCharacterPage() {
           </div>
         </div>
 
-        <h3 style={{ borderBottom: "1px solid var(--primary)", paddingBottom: "0.5rem", marginBottom: "1rem" }}>Ability Scores</h3>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <h3 style={{ borderBottom: "1px solid var(--primary)", paddingBottom: "0.5rem", margin: 0 }}>Ability Scores</h3>
+          <button 
+            type="button" 
+            className="button" 
+            style={{ background: "transparent", border: "1px solid var(--secondary)", color: "var(--secondary)", padding: "0.3rem 0.8rem", fontSize: "0.8rem" }}
+            onClick={handleRollStats}
+          >
+            🎲 Roll All Stats
+          </button>
+        </div>
+
         <div className="stats-grid">
           {Object.entries(formData.stats).map(([stat, val]) => (
             <div key={stat} className="stat-box">
