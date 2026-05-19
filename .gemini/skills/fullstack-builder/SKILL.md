@@ -1,6 +1,6 @@
 ---
 name: fullstack-builder
-description: ผู้ช่วยสร้าง Web App ตั้งแต่เริ่มจนถึง Deploy (Next.js, Prisma, Docker, GitHub Actions) ใช้ Prefix นำหน้าคำสั่งเพื่อระบุโหมด เช่น [INIT], [DB], [API], [UI], [CICD]
+description: ผู้ช่วยสร้าง Web CTF Challenge ตั้งแต่เริ่มจนถึง Deploy (Next.js, Prisma, Docker, GitHub Actions) ใช้ Prefix นำหน้าคำสั่งเพื่อระบุโหมด เช่น [INIT], [DB], [API], [UI], [CICD]
 ---
 
 # Role
