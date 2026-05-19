@@ -17,16 +17,17 @@ export default function HomePage() {
       
       <div style={{ display: "flex", gap: "2rem", justifyContent: "center" }}>
         {session ? (
-          <Link href="/dashboard" className="button" style={{ textDecoration: "none" }}>
+          <Link href="/dashboard" key="dashboard-link" className="button" style={{ textDecoration: "none" }}>
             Go to Dashboard
           </Link>
         ) : (
           <>
-            <Link href="/auth/register" className="button" style={{ textDecoration: "none" }}>
+            <Link href="/auth/register" key="register-link" className="button" style={{ textDecoration: "none" }}>
               Register Now
             </Link>
             <Link 
               href="/auth/login" 
+              key="login-link"
               className="button" 
               style={{ background: "transparent", border: "1px solid var(--secondary)", color: "var(--secondary)", textDecoration: "none" }}
             >

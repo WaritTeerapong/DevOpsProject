@@ -7,8 +7,6 @@ export const metadata = {
   description: "Create and manage your D&D characters",
 };
 
-export const dynamic = "force-dynamic";
-
 export default function RootLayout({
   children,
 }: {
@@ -18,8 +16,8 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Providers>
-          <Navbar key="navbar" />
-          <main key="main">{children}</main>
+          <Navbar />
+          <main>{children}</main>
         </Providers>
       </body>
     </html>
