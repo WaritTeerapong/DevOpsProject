@@ -5,7 +5,7 @@ import { prisma } from "../database/prisma";
 import bcrypt from "bcrypt";
 import { initListeners } from "@/shared/init-listeners";
 
-initListeners();
+// initListeners();
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),

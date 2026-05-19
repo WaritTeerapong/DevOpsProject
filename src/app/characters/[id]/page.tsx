@@ -7,7 +7,7 @@ import { useRouter, useParams } from "next/navigation";
 export default function CharacterDetailPage() {
   const { data: session } = useSession();
   const router = useRouter();
-  const { id } = useParams();
+  const { id } = useParams() as { id: string };
   const [character, setCharacter] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
