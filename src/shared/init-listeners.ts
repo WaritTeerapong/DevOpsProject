@@ -1,4 +1,4 @@
-import { ScoreboardListener } from "./infrastructure/listeners/ScoreboardListener";
+import { ScoreboardListener } from "../infrastructure/listeners/ScoreboardListener";
 
 // Initialize all domain event listeners
 export function initListeners() {
